@@ -8,6 +8,7 @@ import {
   Wallet,
 } from 'lucide-react'
 
+import { AuthGuard } from '@/components/auth/AuthGuard'
 import { DashboardLayout } from '@/layouts/DashboardLayout'
 import { OverviewPage } from '@/pages/OverviewPage'
 import { AnalyticsPage } from '@/pages/AnalyticsPage'
@@ -16,6 +17,10 @@ import { StateDemoPage } from '@/pages/StateDemoPage'
 import { SettingsLayout } from '@/pages/settings/SettingsLayout'
 import { SettingsProfilePage } from '@/pages/settings/SettingsProfilePage'
 import { SettingsBillingPage } from '@/pages/settings/SettingsBillingPage'
+import { AuthLayout } from '@/pages/auth/AuthLayout'
+import { LoginPage } from '@/pages/auth/LoginPage'
+import { RegisterPage } from '@/pages/auth/RegisterPage'
+import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage'
 import type {
   AppRoute,
   RouteContext,
@@ -26,7 +31,11 @@ import type {
 const routeConfig: AppRoute = {
   id: 'root',
   path: '/',
-  element: ({ sidebarSections }) => <DashboardLayout sections={sidebarSections} />,
+  element: ({ sidebarSections }) => (
+    <AuthGuard>
+      <DashboardLayout sections={sidebarSections} />
+    </AuthGuard>
+  ),
   children: [
     {
       id: 'overview',
@@ -116,6 +125,29 @@ const routeConfig: AppRoute = {
           sidebar: { section: 'Settings', order: 4, linkOrder: 2 },
         },
       ],
+    },
+  ],
+}
+
+const authRoute: AppRoute = {
+  id: 'auth',
+  path: 'auth',
+  element: <AuthLayout />,
+  children: [
+    {
+      id: 'auth-login',
+      path: 'login',
+      component: LoginPage,
+    },
+    {
+      id: 'auth-register',
+      path: 'register',
+      component: RegisterPage,
+    },
+    {
+      id: 'auth-forgot',
+      path: 'forgot-password',
+      component: ForgotPasswordPage,
     },
   ],
 }
@@ -221,7 +253,10 @@ function resolveFullPath(basePath: string, route: AppRoute): string {
   return `/${[normalizedBase, normalizedPath].filter(Boolean).join('/')}`
 }
 
-export const routeElements = [renderRoute(routeConfig, { sidebarSections })]
+export const routeElements = [
+  renderRoute(routeConfig, { sidebarSections }),
+  renderRoute(authRoute, { sidebarSections }),
+]
 
-export { sidebarSections, routeConfig }
+export { sidebarSections, routeConfig, authRoute }
 
