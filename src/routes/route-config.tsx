@@ -1,22 +1,8 @@
 import { Outlet, Route } from 'react-router-dom'
-import {
-  Activity,
-  LayoutDashboard,
-  LineChart,
-  ListTree,
-  UserCog,
-  Wallet,
-} from 'lucide-react'
+import { User } from 'lucide-react'
 
 import { AuthGuard } from '@/components/auth/AuthGuard'
 import { DashboardLayout } from '@/layouts/DashboardLayout'
-import { OverviewPage } from '@/pages/OverviewPage'
-import { AnalyticsPage } from '@/pages/AnalyticsPage'
-import { PostsPage } from '@/pages/PostsPage'
-import { StateDemoPage } from '@/pages/StateDemoPage'
-import { SettingsLayout } from '@/pages/settings/SettingsLayout'
-import { SettingsProfilePage } from '@/pages/settings/SettingsProfilePage'
-import { SettingsBillingPage } from '@/pages/settings/SettingsBillingPage'
 import { AuthLayout } from '@/pages/auth/AuthLayout'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { RegisterPage } from '@/pages/auth/RegisterPage'
@@ -27,6 +13,7 @@ import type {
   SidebarLink,
   SidebarSection,
 } from '@/routes/types'
+import { UsersPage } from '@/pages/users'
 
 const routeConfig: AppRoute = {
   id: 'root',
@@ -38,93 +25,17 @@ const routeConfig: AppRoute = {
   ),
   children: [
     {
-      id: 'overview',
+      id: 'users',
       index: true,
-      label: 'Overview',
-      icon: LayoutDashboard,
-      component: OverviewPage,
-      sidebar: { section: 'Dashboard', order: 1, linkOrder: 1 },
+      label: 'Users',
+      icon: User,
+      component: UsersPage,
+      sidebar: { section: 'Users', order: 1, linkOrder: 1 },
     },
     {
-      id: 'overview-alias',
-      path: 'overview',
-      component: OverviewPage,
-    },
-    {
-      id: 'analytics',
-      path: 'analytics',
-      label: 'Analytics',
-      icon: LineChart,
-      component: AnalyticsPage,
-      sidebar: { section: 'Dashboard', order: 1, linkOrder: 2 },
-    },
-    {
-      id: 'data',
-      path: 'data',
-      element: <Outlet />,
-      children: [
-        {
-          id: 'data-index',
-          index: true,
-          component: PostsPage,
-        },
-        {
-          id: 'data-posts',
-          path: 'posts',
-          label: 'Posts feed',
-          icon: ListTree,
-          component: PostsPage,
-          sidebar: { section: 'Data', order: 2, linkOrder: 1 },
-        },
-      ],
-    },
-    {
-      id: 'state',
-      path: 'state',
-      element: <Outlet />,
-      children: [
-        {
-          id: 'state-index',
-          index: true,
-          component: StateDemoPage,
-        },
-        {
-          id: 'state-counter',
-          path: 'counter',
-          label: 'Redux counter',
-          icon: Activity,
-          component: StateDemoPage,
-          sidebar: { section: 'State demos', order: 3, linkOrder: 1 },
-        },
-      ],
-    },
-    {
-      id: 'settings',
-      path: 'settings',
-      element: <SettingsLayout />,
-      children: [
-        {
-          id: 'settings-index',
-          index: true,
-          component: SettingsProfilePage,
-        },
-        {
-          id: 'settings-profile',
-          path: 'profile',
-          label: 'Profile',
-          icon: UserCog,
-          component: SettingsProfilePage,
-          sidebar: { section: 'Settings', order: 4, linkOrder: 1 },
-        },
-        {
-          id: 'settings-billing',
-          path: 'billing',
-          label: 'Billing',
-          icon: Wallet,
-          component: SettingsBillingPage,
-          sidebar: { section: 'Settings', order: 4, linkOrder: 2 },
-        },
-      ],
+      id: 'users-alias',
+      path: 'users',
+      component: UsersPage,
     },
   ],
 }

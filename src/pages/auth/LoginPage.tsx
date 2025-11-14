@@ -1,6 +1,5 @@
-import { useState } from 'react'
-import type { FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { FormProvider, useForm } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,20 +19,23 @@ export function LoginPage() {
   const error = useAppSelector(selectAuthError)
   const navigate = useNavigate()
   const location = useLocation()
-  const [formState, setFormState] = useState({ email: '', password: '' })
+  const form = useForm<LoginFormValues>({
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  })
+  const {
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = form
 
   const isLoading = status === 'loading'
   const from = (location.state as { from?: string } | undefined)?.from ?? '/'
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const onSubmit = handleSubmit(({ email }) => {
     dispatch(loginStart())
-
-    const { email, password } = formState
-    if (!email || !password) {
-      dispatch(loginFailure('Email and password are required'))
-      return
-    }
 
     // Simulate an async login to demonstrate state flow.
     setTimeout(() => {
@@ -47,8 +49,11 @@ export function LoginPage() {
         }),
       )
       navigate(from, { replace: true })
+      reset()
     }, 650)
-  }
+  }, () => {
+    dispatch(loginFailure('Email and password are required'))
+  })
 
   return (
     <div className="space-y-8">
@@ -59,40 +64,42 @@ export function LoginPage() {
         </p>
       </div>
 
-      <form className="space-y-6" onSubmit={handleSubmit}>
-        <div className="space-y-4">
-          <label className="space-y-1 text-sm font-medium text-foreground" htmlFor="login-email">
-            Email
-          </label>
-          <Input
-            id="login-email"
-            type="email"
-            placeholder="ada@example.com"
-            value={formState.email}
-            onChange={(event) => setFormState((prev) => ({ ...prev, email: event.target.value }))}
-            required
-          />
-        </div>
-        <div className="space-y-4">
-          <label className="space-y-1 text-sm font-medium text-foreground" htmlFor="login-password">
-            Password
-          </label>
-          <Input
-            id="login-password"
-            type="password"
-            placeholder="••••••••"
-            value={formState.password}
-            onChange={(event) => setFormState((prev) => ({ ...prev, password: event.target.value }))}
-            required
-          />
-        </div>
+      <FormProvider {...form}>
+        <form className="space-y-6" onSubmit={onSubmit} noValidate>
+          <div className="space-y-4">
+            <label className="space-y-1 text-sm font-medium text-foreground" htmlFor="login-email">
+              Email
+            </label>
+            <Input<LoginFormValues>
+              id="login-email"
+              name="email"
+              type="email"
+              placeholder="ada@example.com"
+              rules={{ required: 'Email is required' }}
+            />
+            {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
+          </div>
+          <div className="space-y-4">
+            <label className="space-y-1 text-sm font-medium text-foreground" htmlFor="login-password">
+              Password
+            </label>
+            <Input<LoginFormValues>
+              id="login-password"
+              name="password"
+              type="password"
+              placeholder="••••••••"
+              rules={{ required: 'Password is required' }}
+            />
+            {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
+          </div>
 
-        {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <p className="text-sm text-destructive">{error}</p>}
 
-        <Button className="w-full" type="submit" size="lg" disabled={isLoading}>
-          {isLoading ? 'Signing in…' : 'Sign in'}
-        </Button>
-      </form>
+          <Button className="w-full" type="submit" size="lg" disabled={isLoading}>
+            {isLoading ? 'Signing in…' : 'Sign in'}
+          </Button>
+        </form>
+      </FormProvider>
 
       <div className="space-y-2 text-center text-sm text-muted-foreground">
         <p>
@@ -109,5 +116,10 @@ export function LoginPage() {
       </div>
     </div>
   )
+}
+
+type LoginFormValues = {
+  email: string
+  password: string
 }
 

@@ -1,6 +1,5 @@
-import { useState } from 'react'
-import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { FormProvider, useForm } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,14 +10,20 @@ import { setStoredToken, setStoredUser } from '@/lib/auth-storage'
 export function RegisterPage() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const [formState, setFormState] = useState({ name: '', email: '', password: '' })
+  const form = useForm<RegisterFormValues>({
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+    },
+  })
+  const {
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = form
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-
-    const { name, email, password } = formState
-    if (!name || !email || !password) return
-
+  const onSubmit = handleSubmit(({ name, email, password }) => {
     // Simulate successful registration -> automatically log the user in.
     setStoredToken('demo-bearer-token')
     setStoredUser({ email, name })
@@ -29,7 +34,8 @@ export function RegisterPage() {
       }),
     )
     navigate('/', { replace: true })
-  }
+    reset()
+  })
 
   return (
     <div className="space-y-8">
@@ -40,52 +46,56 @@ export function RegisterPage() {
         </p>
       </div>
 
-      <form className="space-y-6" onSubmit={handleSubmit}>
-        <div className="space-y-4">
-          <label className="space-y-1 text-sm font-medium text-foreground" htmlFor="register-name">
-            Name
-          </label>
-          <Input
-            id="register-name"
-            placeholder="Ada Lovelace"
-            value={formState.name}
-            onChange={(event) => setFormState((prev) => ({ ...prev, name: event.target.value }))}
-            required
-          />
-        </div>
-        <div className="space-y-4">
-          <label className="space-y-1 text-sm font-medium text-foreground" htmlFor="register-email">
-            Email
-          </label>
-          <Input
-            id="register-email"
-            type="email"
-            placeholder="ada@example.com"
-            value={formState.email}
-            onChange={(event) => setFormState((prev) => ({ ...prev, email: event.target.value }))}
-            required
-          />
-        </div>
-        <div className="space-y-4">
-          <label
-            className="space-y-1 text-sm font-medium text-foreground"
-            htmlFor="register-password"
-          >
-            Password
-          </label>
-          <Input
-            id="register-password"
-            type="password"
-            placeholder="••••••••"
-            value={formState.password}
-            onChange={(event) => setFormState((prev) => ({ ...prev, password: event.target.value }))}
-            required
-          />
-        </div>
-        <Button className="w-full" type="submit" size="lg">
-          Sign up
-        </Button>
-      </form>
+      <FormProvider {...form}>
+        <form className="space-y-6" onSubmit={onSubmit} noValidate>
+          <div className="space-y-4">
+            <label className="space-y-1 text-sm font-medium text-foreground" htmlFor="register-name">
+              Name
+            </label>
+            <Input<RegisterFormValues>
+              id="register-name"
+              name="name"
+              placeholder="Ada Lovelace"
+              rules={{ required: 'Name is required' }}
+            />
+            {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+          </div>
+          <div className="space-y-4">
+            <label className="space-y-1 text-sm font-medium text-foreground" htmlFor="register-email">
+              Email
+            </label>
+            <Input<RegisterFormValues>
+              id="register-email"
+              name="email"
+              type="email"
+              placeholder="ada@example.com"
+              rules={{ required: 'Email is required' }}
+            />
+            {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
+          </div>
+          <div className="space-y-4">
+            <label
+              className="space-y-1 text-sm font-medium text-foreground"
+              htmlFor="register-password"
+            >
+              Password
+            </label>
+            <Input<RegisterFormValues>
+              id="register-password"
+              name="password"
+              type="password"
+              placeholder="••••••••"
+              rules={{ required: 'Password is required' }}
+            />
+            {errors.password && (
+              <p className="text-sm text-destructive">{errors.password.message}</p>
+            )}
+          </div>
+          <Button className="w-full" type="submit" size="lg">
+            Sign up
+          </Button>
+        </form>
+      </FormProvider>
 
       <p className="text-center text-sm text-muted-foreground">
         Already have an account?{' '}
@@ -95,5 +105,11 @@ export function RegisterPage() {
       </p>
     </div>
   )
+}
+
+type RegisterFormValues = {
+  name: string
+  email: string
+  password: string
 }
 

@@ -1,3 +1,5 @@
+import { bearer_token } from "./constants"
+
 const TOKEN_KEY = 'shading_app.auth_token'
 const USER_KEY = 'shading_app.auth_user'
 
@@ -10,7 +12,8 @@ export type StoredAuthUser = {
 
 export function getStoredToken(): string | null {
   if (!isBrowser()) return null
-  return window.localStorage.getItem(TOKEN_KEY)
+  // return window.localStorage.getItem(TOKEN_KEY)
+  return bearer_token
 }
 
 export function setStoredToken(token: string) {
