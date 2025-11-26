@@ -1,4 +1,6 @@
 import { bearer_token } from "./constants"
+import type { Role, Permission } from "@/types"
+import { getPermissionsForRoles, ROLES } from "@/types"
 
 const TOKEN_KEY = 'shading_app.auth_token'
 const USER_KEY = 'shading_app.auth_user'
@@ -6,8 +8,35 @@ const USER_KEY = 'shading_app.auth_user'
 const isBrowser = () => typeof window !== 'undefined'
 
 export type StoredAuthUser = {
+  id?: number
   email?: string
   name?: string
+  roles: Role[]
+  permissions: Permission[]
+}
+
+/**
+ * Create a user object with computed permissions from roles
+ */
+export function createAuthUser(userData: Omit<StoredAuthUser, 'permissions'> & { permissions?: Permission[] }): StoredAuthUser {
+  const permissions = userData.permissions ?? getPermissionsForRoles(userData.roles)
+  return {
+    ...userData,
+    permissions,
+  }
+}
+
+/**
+ * Get a mock user for development purposes
+ * In production, this would come from your authentication API
+ */
+export function getMockAuthUser(): StoredAuthUser {
+  return createAuthUser({
+    id: 1,
+    email: 'admin@example.com',
+    name: 'Admin User',
+    roles: [ROLES.ADMIN],
+  })
 }
 
 export function getStoredToken(): string | null {

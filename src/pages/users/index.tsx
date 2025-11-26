@@ -4,12 +4,14 @@ import { columns } from "./data/column"
 import { DataTableDemo, type FilterConfig } from "@/components/dataTable"
 import { useGetUsersGridDataQuery } from "@/services/userApi"
 import type { User, GridRequest } from "@/types"
+import { PERMISSIONS } from "@/types"
 import type { FetchBaseQueryError } from "@reduxjs/toolkit/query"
 import { DEFAULT_GRID_FORM_VALUES } from "@/lib/constants"
 import { AddEditSidebar, DeleteConfirmationDialog } from "@/components/shared"
 import { UserForm } from "./components/UserForm"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
+import { usePermissions } from "@/hooks/use-permissions"
 
 type GridFormValues = {
   pageIndex: number
@@ -44,6 +46,9 @@ type UserFormValues = {
 }
 
 export const UsersPage = () => {
+    const { permissions, hasPermission } = usePermissions()
+    const canCreate = hasPermission(PERMISSIONS.USERS_CREATE)
+    
     const gridForm = useForm<GridFormValues>({
         defaultValues: DEFAULT_GRID_FORM_VALUES,
     })
@@ -180,13 +185,19 @@ export const UsersPage = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Users</h1>
-          <Button onClick={handleAdd}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add User
-          </Button>
+          {canCreate && (
+            <Button onClick={handleAdd}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add User
+            </Button>
+          )}
         </div>
         <DataTableDemo<User> 
-          columns={columns(handleEdit, handleDelete)} 
+          columns={columns({
+            onEdit: handleEdit, 
+            onDelete: handleDelete,
+            userPermissions: permissions,
+          })} 
           data={data?.displayData || []}
           totalRecords={data?.totalRecords || 0}
           filters={userFilters}

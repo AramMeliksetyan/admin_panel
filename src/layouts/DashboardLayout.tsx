@@ -102,9 +102,6 @@ export function DashboardLayout({ sections }: DashboardLayoutProps) {
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
           <div className="flex flex-1 items-center justify-between gap-4">
-            <div className="hidden text-sm text-muted-foreground lg:block">
-              Build your admin quickly—customize this layout however you like.
-            </div>
             <div className="ml-auto flex items-center gap-3">
               {user ? (
                 <div className="text-sm text-muted-foreground">
@@ -119,7 +116,7 @@ export function DashboardLayout({ sections }: DashboardLayoutProps) {
           </div>
         </header>
         <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
-          <div className="mx-auto flex w-full max-w-5xl flex-col gap-10">
+          <div className="mx-auto flex w-full flex-col gap-10">
             <Outlet />
           </div>
         </main>

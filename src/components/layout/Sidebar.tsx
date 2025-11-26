@@ -1,13 +1,46 @@
+import { useMemo } from 'react'
 import { NavLink } from 'react-router-dom'
 
 import { cn } from '@/lib/utils'
-import type { SidebarSection } from '@/routes/types'
+import type { SidebarSection, SidebarLink } from '@/routes/types'
+import { usePermissions } from '@/hooks/use-permissions'
 
 type SidebarProps = {
   sections: SidebarSection[]
 }
 
 export function Sidebar({ sections }: SidebarProps) {
+  const { permissions, roles } = usePermissions()
+
+  // Filter sections and links based on user permissions
+  const filteredSections = useMemo(() => {
+    const canAccessLink = (link: SidebarLink): boolean => {
+      // If no access requirements, link is accessible
+      if (!link.permissions?.length && !link.roles?.length) {
+        return true
+      }
+
+      // Check permissions (any match)
+      const hasRequiredPermission = link.permissions?.length
+        ? link.permissions.some((p) => permissions.includes(p))
+        : true
+
+      // Check roles (any match)
+      const hasRequiredRole = link.roles?.length
+        ? link.roles.some((r) => roles.includes(r))
+        : true
+
+      return hasRequiredPermission && hasRequiredRole
+    }
+
+    return sections
+      .map((section) => ({
+        ...section,
+        links: section.links.filter(canAccessLink),
+      }))
+      .filter((section) => section.links.length > 0)
+  }, [sections, permissions, roles])
+
   return (
     <div className="flex h-full flex-col border-border bg-muted/30 px-4 py-6 text-sm">
       <div className="mb-8">
@@ -17,7 +50,7 @@ export function Sidebar({ sections }: SidebarProps) {
       </div>
 
       <div className="space-y-6">
-        {sections.map((section) => (
+        {filteredSections.map((section) => (
           <div key={section.title} className="space-y-3">
             <h3 className="px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {section.title}

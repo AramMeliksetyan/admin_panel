@@ -2,8 +2,8 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 
 import { useAppDispatch, useAppSelector } from '@/lib/hooks'
-import { getStoredToken, getStoredUser } from '@/lib/auth-storage'
-import { hydrate, selectAuthToken } from '@/features/auth/authSlice'
+import { getStoredToken, getStoredUser, getMockAuthUser } from '@/lib/auth-storage'
+import { hydrate, selectAuthToken, selectAuthUser } from '@/features/auth/authSlice'
 
 type AuthGuardProps = {
   children: ReactNode
@@ -12,6 +12,7 @@ type AuthGuardProps = {
 export function AuthGuard({ children }: AuthGuardProps) {
   const dispatch = useAppDispatch()
   const token = useAppSelector(selectAuthToken)
+  const user = useAppSelector(selectAuthUser)
   const location = useLocation()
   const [hasHydrated, setHasHydrated] = useState(false)
   const [cachedToken, setCachedToken] = useState<string | null>(null)
@@ -19,11 +20,16 @@ export function AuthGuard({ children }: AuthGuardProps) {
   useEffect(() => {
     const stored = getStoredToken()
     if (!token && stored) {
-      dispatch(hydrate({ token: stored, user: getStoredUser() }))
+      // Get stored user or use mock user for development
+      const storedUser = getStoredUser() ?? getMockAuthUser()
+      dispatch(hydrate({ token: stored, user: storedUser }))
+    } else if (token && !user) {
+      // Token exists but no user, hydrate with mock user
+      dispatch(hydrate({ token, user: getMockAuthUser() }))
     }
     setCachedToken(stored)
     setHasHydrated(true)
-  }, [dispatch, token])
+  }, [dispatch, token, user])
 
   if (!hasHydrated) {
     return null

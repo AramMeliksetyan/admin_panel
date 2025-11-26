@@ -1,4 +1,4 @@
-import type { User } from "@/types"
+import type { User, Permission } from "@/types"
 import type { ColumnDef } from "@tanstack/react-table"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
@@ -13,13 +13,25 @@ import {
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { SortIndicator } from "@/components/dataTable/SortIndicator"
+import { PERMISSIONS } from "@/types"
 
 type ColumnProps = {
   onEdit: (user: User) => void
   onDelete: (user: User) => void
+  /** Current user's permissions - used to show/hide actions */
+  userPermissions?: Permission[]
 }
 
-export const columns = ({ onEdit, onDelete }: ColumnProps): ColumnDef<User>[] => [
+const hasPermission = (permissions: Permission[] | undefined, permission: Permission): boolean => {
+  return permissions?.includes(permission) ?? false
+}
+
+export const columns = ({ onEdit, onDelete, userPermissions }: ColumnProps): ColumnDef<User>[] => {
+  const canEdit = hasPermission(userPermissions, PERMISSIONS.USERS_EDIT)
+  const canDelete = hasPermission(userPermissions, PERMISSIONS.USERS_DELETE)
+  const showActions = canEdit || canDelete
+
+  return [
   {
     id: "select",
     header: ({ table }) => (
@@ -147,10 +159,11 @@ export const columns = ({ onEdit, onDelete }: ColumnProps): ColumnDef<User>[] =>
     },
     cell: ({ row }) => <div>{row.getValue("department")}</div>,
   },
-  {
+  // Only include actions column if user has any action permissions
+  ...(showActions ? [{
     id: "actions",
     enableHiding: false,
-    cell: ({ row }) => {
+    cell: ({ row }: { row: { original: User } }) => {
       const user = row.original
 
       return (
@@ -173,22 +186,31 @@ export const columns = ({ onEdit, onDelete }: ColumnProps): ColumnDef<User>[] =>
             >
               Copy email
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => onEdit(user)}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit user
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="text-destructive"
-              onClick={() => onDelete(user)}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete user
-            </DropdownMenuItem>
+            {canEdit && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => onEdit(user)}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit user
+                </DropdownMenuItem>
+              </>
+            )}
+            {canDelete && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={() => onDelete(user)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete user
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       )
     },
-  },
+  }] as ColumnDef<User>[] : []),
 ]
+}
