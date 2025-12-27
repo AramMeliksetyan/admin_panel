@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAppDispatch } from '@/lib/hooks'
 import { loginSuccess } from '@/features/auth/authSlice'
-import { setStoredToken, setStoredUser } from '@/lib/auth-storage'
+import { setStoredToken, setStoredUser, createAuthUser } from '@/lib/auth-storage'
+import { ROLES } from '@/types'
 
 export function RegisterPage() {
   const dispatch = useAppDispatch()
@@ -23,14 +24,20 @@ export function RegisterPage() {
     reset,
   } = form
 
-  const onSubmit = handleSubmit(({ name, email, password }) => {
+  const onSubmit = handleSubmit(({ name, email }) => {
     // Simulate successful registration -> automatically log the user in.
+    // Create user with default role (ADMIN for demo purposes)
+    const user = createAuthUser({
+      email,
+      name,
+      roles: [ROLES.ADMIN],
+    })
     setStoredToken('demo-bearer-token')
-    setStoredUser({ email, name })
+    setStoredUser(user)
     dispatch(
       loginSuccess({
         token: 'demo-bearer-token',
-        user: { email, name },
+        user,
       }),
     )
     navigate('/', { replace: true })

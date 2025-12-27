@@ -11,7 +11,8 @@ import {
   selectAuthError,
   selectAuthStatus,
 } from '@/features/auth/authSlice'
-import { setStoredToken, setStoredUser } from '@/lib/auth-storage'
+import { setStoredToken, setStoredUser, createAuthUser } from '@/lib/auth-storage'
+import { ROLES } from '@/types'
 
 export function LoginPage() {
   const dispatch = useAppDispatch()
@@ -39,7 +40,12 @@ export function LoginPage() {
 
     // Simulate an async login to demonstrate state flow.
     setTimeout(() => {
-      const user = { email, name: email.split('@')[0] ?? 'User' }
+      // Create user with default role (ADMIN for demo purposes)
+      const user = createAuthUser({
+        email,
+        name: email.split('@')[0] ?? 'User',
+        roles: [ROLES.ADMIN],
+      })
       setStoredToken('demo-bearer-token')
       setStoredUser(user)
       dispatch(
