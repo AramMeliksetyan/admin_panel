@@ -1,7 +1,10 @@
 import { useMemo, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { columns } from "@/entities/user/config/columns";
-import { DataTableDemo, type FilterConfig } from "@/shared/components/dataTable";
+import {
+  DataTableDemo,
+  type FilterConfig,
+} from "@/shared/components/dataTable";
 import { useGetUsersGridDataQuery } from "@/entities/user/api/userApi";
 import type { User } from "@/entities/user/model/types";
 import type { GridRequest } from "@/shared/types";
@@ -24,6 +27,7 @@ type GridFormValues = {
   isArchived: boolean;
   filters: unknown[];
   scoreFilter: unknown[];
+  columnFilters: Record<string, string>;
 };
 
 const userFilters: FilterConfig[] = [
@@ -81,6 +85,7 @@ export const UsersPage = () => {
   const isArchived = watch("isArchived");
   const filters = watch("filters");
   const scoreFilter = watch("scoreFilter");
+  const columnFilters = watch("columnFilters");
 
   const gridRequest: GridRequest = useMemo(
     () => ({
@@ -93,6 +98,10 @@ export const UsersPage = () => {
       isArchived,
       filters,
       scoreFilter,
+      columnFilters:
+        columnFilters && Object.keys(columnFilters).length > 0
+          ? columnFilters
+          : undefined,
     }),
     [
       pageIndex,
@@ -104,6 +113,7 @@ export const UsersPage = () => {
       isArchived,
       filters,
       scoreFilter,
+      columnFilters,
     ]
   );
 

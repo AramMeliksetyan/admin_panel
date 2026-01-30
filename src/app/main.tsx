@@ -5,12 +5,15 @@ import { Provider } from "react-redux";
 import "./styles/index.css";
 import App from "./App.tsx";
 import { store } from "@/shared/lib/store";
+import { TranslationProvider } from "@/shared/context/TranslationContext";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Provider store={store}>
       <BrowserRouter>
-        <App />
+        <TranslationProvider>
+          <App />
+        </TranslationProvider>
       </BrowserRouter>
     </Provider>
   </StrictMode>

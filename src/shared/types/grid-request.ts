@@ -8,4 +8,6 @@ export type GridRequest = {
   isArchived?: boolean
   filters?: unknown[]
   scoreFilter?: unknown[]
+  /** Per-column filter values sent to backend (column id -> filter text) */
+  columnFilters?: Record<string, string>
 }

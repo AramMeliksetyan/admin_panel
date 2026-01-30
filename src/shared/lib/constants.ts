@@ -12,6 +12,7 @@ export const DEFAULT_GRID_FORM_VALUES = {
   isArchived: false,
   filters: [] as unknown[],
   scoreFilter: [] as unknown[],
+  columnFilters: {} as Record<string, string>,
 }
 
 export { API_URL, bearer_token }
