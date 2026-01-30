@@ -1,7 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 
-import { getStoredToken, getStoredUser, type StoredAuthUser } from '@/lib/auth-storage'
-import type { Permission, Role } from '@/types'
+import { getStoredToken, getStoredUser, type StoredAuthUser } from '@/shared/lib/auth-storage'
+import type { Permission, Role } from '@/shared/types'
 
 type AuthState = {
   token: string | null

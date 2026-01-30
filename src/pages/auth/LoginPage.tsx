@@ -1,9 +1,9 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { FormProvider, useForm } from 'react-hook-form'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { useAppDispatch, useAppSelector } from '@/lib/hooks'
+import { Button } from '@/shared/ui/button'
+import { Input } from '@/shared/ui/input'
+import { useAppDispatch, useAppSelector } from '@/shared/lib/hooks'
 import {
   loginFailure,
   loginStart,
@@ -11,8 +11,8 @@ import {
   selectAuthError,
   selectAuthStatus,
 } from '@/features/auth/authSlice'
-import { setStoredToken, setStoredUser, createAuthUser } from '@/lib/auth-storage'
-import { ROLES } from '@/types'
+import { setStoredToken, setStoredUser, createAuthUser } from '@/shared/lib/auth-storage'
+import { ROLES } from '@/shared/types'
 
 export function LoginPage() {
   const dispatch = useAppDispatch()

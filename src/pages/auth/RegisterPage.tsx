@@ -1,12 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { FormProvider, useForm } from 'react-hook-form'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { useAppDispatch } from '@/lib/hooks'
+import { Button } from '@/shared/ui/button'
+import { Input } from '@/shared/ui/input'
+import { useAppDispatch } from '@/shared/lib/hooks'
 import { loginSuccess } from '@/features/auth/authSlice'
-import { setStoredToken, setStoredUser, createAuthUser } from '@/lib/auth-storage'
-import { ROLES } from '@/types'
+import { setStoredToken, setStoredUser, createAuthUser } from '@/shared/lib/auth-storage'
+import { ROLES } from '@/shared/types'
 
 export function RegisterPage() {
   const dispatch = useAppDispatch()
