@@ -1,34 +1,22 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { columns } from "@/entities/user/config/columns";
 import {
   DataTableDemo,
   type FilterConfig,
 } from "@/shared/components/dataTable";
+import type { GridFormValues } from "@/shared/components/dataTable/types";
 import { useGetUsersGridDataQuery } from "@/entities/user/api/userApi";
 import type { User } from "@/entities/user/model/types";
-import type { GridRequest } from "@/shared/types";
 import { PERMISSIONS } from "@/shared/types";
-import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import { getFetchErrorMessage } from "@/shared/api/api-helpers";
 import { DEFAULT_GRID_FORM_VALUES } from "@/shared/lib/constants";
 import { AddEditSidebar, DeleteConfirmationDialog } from "@/shared/components";
 import { UserForm } from "@/features/users/ui/UserForm";
 import { Button } from "@/shared/ui/button";
 import { Plus } from "lucide-react";
 import { usePermissions } from "@/shared/hooks/use-permissions";
-
-type GridFormValues = {
-  pageIndex: number;
-  pageSize: number;
-  search: string;
-  sortColumn: string;
-  sortDirection: "asc" | "desc" | "";
-  conditionMatch: number;
-  isArchived: boolean;
-  filters: unknown[];
-  scoreFilter: unknown[];
-  columnFilters: Record<string, string>;
-};
+import { useGridRequest } from "@/shared/hooks";
 
 const userFilters: FilterConfig[] = [
   {
@@ -75,54 +63,12 @@ export const UsersPage = () => {
     },
   });
 
-  const { watch } = gridForm;
-  const pageIndex = watch("pageIndex");
-  const pageSize = watch("pageSize");
-  const search = watch("search");
-  const sortColumn = watch("sortColumn");
-  const sortDirection = watch("sortDirection");
-  const conditionMatch = watch("conditionMatch");
-  const isArchived = watch("isArchived");
-  const filters = watch("filters");
-  const scoreFilter = watch("scoreFilter");
-  const columnFilters = watch("columnFilters");
+  const gridRequest = useGridRequest(gridForm);
 
-  const gridRequest: GridRequest = useMemo(
-    () => ({
-      start: pageIndex * pageSize,
-      length: pageSize,
-      search,
-      sortColumn,
-      sortDirection,
-      conditionMatch,
-      isArchived,
-      filters,
-      scoreFilter,
-      columnFilters:
-        columnFilters && Object.keys(columnFilters).length > 0
-          ? columnFilters
-          : undefined,
-    }),
-    [
-      pageIndex,
-      pageSize,
-      search,
-      sortColumn,
-      sortDirection,
-      conditionMatch,
-      isArchived,
-      filters,
-      scoreFilter,
-      columnFilters,
-    ]
-  );
-
-  const { data, isLoading, isError, error } = useGetUsersGridDataQuery(
-    gridRequest,
-    {
+  const { data, isLoading, isFetching, isError, error } =
+    useGetUsersGridDataQuery(gridRequest, {
       skip: false,
-    }
-  );
+    });
 
   const handleAdd = () => {
     setSelectedUser(null);
@@ -193,18 +139,7 @@ export const UsersPage = () => {
     }
   };
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) {
-    const fetchError = error as FetchBaseQueryError;
-    const errorMessage =
-      "data" in fetchError &&
-      typeof fetchError.data === "object" &&
-      fetchError.data !== null &&
-      "message" in fetchError.data
-        ? String(fetchError.data.message)
-        : "An error occurred";
-    return <div>Error: {errorMessage}</div>;
-  }
+  const errorMessage = isError ? getFetchErrorMessage(error) : undefined;
 
   return (
     <FormProvider {...gridForm}>
@@ -227,6 +162,9 @@ export const UsersPage = () => {
           data={data?.displayData || []}
           totalRecords={data?.totalRecords || 0}
           filters={userFilters}
+          isLoading={isLoading || isFetching}
+          isError={isError}
+          errorMessage={errorMessage}
         />
       </div>
 

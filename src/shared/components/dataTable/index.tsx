@@ -43,14 +43,19 @@ export function DataTableDemo<T>({
   hasSearchInput = true,
   filters = [],
   filterableColumnIds = [],
+  isLoading = false,
+  isError = false,
+  errorMessage = "An error occurred",
 }: {
   columns: ColumnDef<T>[];
   data: T[];
   totalRecords?: number;
   hasSearchInput?: boolean;
   filters?: FilterConfig[];
-  /** Column ids that show a filter input; values are sent to backend as columnFilters */
   filterableColumnIds?: string[];
+  isLoading?: boolean;
+  isError?: boolean;
+  errorMessage?: string;
 }) {
   const form = useFormContext<GridFormValues>();
   const { watch, setValue } = form;
@@ -246,16 +251,35 @@ export function DataTableDemo<T>({
         onFiltersOpenChange={setIsFiltersOpen}
         filtersSheetContent={filtersSheetContent}
       />
+      <DataTableFooter
+        table={table}
+        pageIndex={pageIndex}
+        pageSize={pageSize}
+        totalRecords={totalRecords}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+      />
       <div className="overflow-hidden rounded-md border">
-        <Table>
-          <DataTableHeader
-            table={table}
-            filterableColumnIds={filterableColumnIds}
-            columnFilters={columnFilters}
-            onColumnFilterChange={handleColumnFilterChange}
-          />
-          <DataTableBody table={table} columnsCount={columns.length} />
-        </Table>
+        {isError ? (
+          <div className="flex min-h-[200px] items-center justify-center p-8 text-destructive">
+            <p className="text-center font-medium">{errorMessage}</p>
+          </div>
+        ) : (
+          <Table>
+            <DataTableHeader
+              table={table}
+              filterableColumnIds={filterableColumnIds}
+              columnFilters={columnFilters}
+              onColumnFilterChange={handleColumnFilterChange}
+            />
+            <DataTableBody
+              table={table}
+              columnsCount={columns.length}
+              isLoading={isLoading}
+              pageSize={pageSize}
+            />
+          </Table>
+        )}
       </div>
       <DataTableFooter
         table={table}

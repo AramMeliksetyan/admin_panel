@@ -48,3 +48,24 @@ export function transformErrorResponse(response: unknown): unknown {
 
   return response
 }
+
+/**
+ * Extracts a user-friendly error message from RTK Query FetchBaseQueryError
+ * (or any error-like object). Use when passing error state to shared components.
+ */
+export function getFetchErrorMessage(
+  error: unknown,
+  fallback = 'An error occurred'
+): string {
+  if (error && typeof error === 'object' && 'data' in error) {
+    const data = (error as { data: unknown }).data
+    if (
+      data !== null &&
+      typeof data === 'object' &&
+      'message' in data
+    ) {
+      return String((data as { message: unknown }).message)
+    }
+  }
+  return fallback
+}
